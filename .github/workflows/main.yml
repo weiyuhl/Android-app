@@ -114,11 +114,14 @@ jobs:
         }
         EOL
 
-        # 确保 gradlew 可执行
+    # 5. 确保 gradlew 可执行并生成
+    - name: Ensure gradlew wrapper is generated
+      run: |
         cd my-android-app
-        ./gradlew wrapper
+        chmod +x gradlew || true
+        ./gradlew wrapper || echo "Gradle wrapper already exists."
 
-    # 5. 提交项目文件到仓库
+    # 6. 提交项目文件到仓库
     - name: Commit and Push Project Files
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -135,13 +138,13 @@ jobs:
         git branch -M main # 确保本地分支为 main
         git push -u origin main # 推送到远程 main 分支
 
-    # 6. 构建 APK
+    # 7. 构建 APK
     - name: Build APK
       run: |
         cd my-android-app
         ./gradlew assembleDebug
 
-    # 7. 提交 APK 文件到仓库
+    # 8. 提交 APK 文件到仓库
     - name: Commit and Push APK File
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
