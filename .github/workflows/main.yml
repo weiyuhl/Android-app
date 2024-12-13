@@ -126,8 +126,8 @@ jobs:
         git add .
         git commit -m "Generate Android project with JGit"
         git remote add origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
-        git branch -M main
-        git push origin main
+        git branch -M main # 确保本地分支为 main
+        git push -u origin main # 推送到远程 main 分支
 
     # 6. 构建 APK
     - name: Build APK
