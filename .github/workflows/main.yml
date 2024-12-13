@@ -18,10 +18,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # 3. 拉取 Android 构建镜像
+      # 3. 拉取 Android 构建 Docker 镜像
       - name: Pull Android Build Docker Image
         run: |
-          docker pull cimg/android:latest
+          docker pull cimg/android:2022.04  # 使用具体的版本标签
 
       # 4. 生成 Android 项目
       - name: Generate Android Project
