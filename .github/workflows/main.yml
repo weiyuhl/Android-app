@@ -126,6 +126,8 @@ jobs:
         git add .
         git commit -m "Generate Android project with JGit"
         git remote add origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+        git fetch origin main # 拉取远程 main 分支的内容
+        git pull --rebase origin main # 合并远程内容到本地
         git branch -M main # 确保本地分支为 main
         git push -u origin main # 推送到远程 main 分支
 
