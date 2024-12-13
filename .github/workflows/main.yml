@@ -114,6 +114,10 @@ jobs:
         }
         EOL
 
+        # 确保 gradlew 可执行
+        cd my-android-app
+        ./gradlew wrapper
+
     # 5. 提交项目文件到仓库
     - name: Commit and Push Project Files
       env:
@@ -135,7 +139,6 @@ jobs:
     - name: Build APK
       run: |
         cd my-android-app
-        ./gradlew wrapper
         ./gradlew assembleDebug
 
     # 7. 提交 APK 文件到仓库
