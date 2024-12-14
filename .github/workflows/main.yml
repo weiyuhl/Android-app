@@ -1,36 +1,35 @@
-name: Build Kotlin Android App
+name: Kotlin Example App Build
 
 on:
   push:
     branches:
-      - main  # 监听推送到 main 分支
-  pull_request:
-    branches:
-      - main  # 监听从其他分支提交的 PR
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # 在 Ubuntu 环境下执行
+    runs-on: ubuntu-latest
 
     steps:
-    # 1. 设置 JDK 17
+    # Step 1: Set up JDK 17
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
-        distribution: temurin
-        java-version: 17
+        distribution: 'temurin'
+        version: '17'
+        java-package: 'jdk'
+        check-latest: false
 
-    # 2. 检出代码
+    # Step 2: Checkout the repository
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # 3. 创建 Kotlin 项目
+    # Step 3: Generate Kotlin project
     - name: Generate Kotlin project
       run: |
         mkdir kotlin-example-app
         cd kotlin-example-app
 
-        # 创建 settings.gradle 文件
+        # Create settings.gradle
         cat > settings.gradle <<EOF
         pluginManagement {
           repositories {
@@ -48,7 +47,7 @@ jobs:
         rootProject.name = "KotlinExampleApp"
         EOF
 
-        # 创建 build.gradle 文件
+        # Create build.gradle
         cat > build.gradle <<EOF
         plugins {
           id 'com.android.application' version '8.1.2'
@@ -57,14 +56,16 @@ jobs:
 
         android {
           compileSdkVersion 33
+
           defaultConfig {
             applicationId "com.example.app"
             minSdkVersion 21
             targetSdkVersion 33
             versionCode 1
             versionName "1.0"
-            namespace 'com.example.app'  # 必须指定命名空间
+            namespace 'com.example.app' // Required namespace
           }
+
           buildTypes {
             release {
               minifyEnabled false
@@ -84,22 +85,18 @@ jobs:
         }
         EOF
 
-        # 初始化 Gradle Wrapper
+        # Initialize Gradle Wrapper
         gradle wrapper --gradle-version 8.1.1
 
-    # 4. 构建 APK
-    - name: Build APK
+    # Step 4: Build the project
+    - name: Build Kotlin project
       run: |
         cd kotlin-example-app
-        ./gradlew assembleRelease
+        ./gradlew build
 
-    # 5. 上传生成的 APK
+    # Step 5: Upload APK as Artifact
     - name: Upload APK as Artifact
       uses: actions/upload-artifact@v3
       with:
         name: kotlin-example-app-apk
         path: kotlin-example-app/app/build/outputs/apk/release/app-release.apk
-
-    # 6. 完成工作
-    - name: Complete workflow
-      run: echo "Build completed successfully."
