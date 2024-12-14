@@ -69,57 +69,18 @@ jobs:
           }
           EOF
 
-          # 创建应用程序主目录
-          mkdir -p app/src/main/java/com/example/app
-          mkdir -p app/src/main/res/layout
-          mkdir -p app/src/main/res/values
-
-          # 创建 MainActivity 文件
-          cat > app/src/main/java/com/example/app/MainActivity.kt <<EOF
-          package com.example.app
-
-          import android.os.Bundle
-          import androidx.appcompat.app.AppCompatActivity
-
-          class MainActivity : AppCompatActivity() {
-              override fun onCreate(savedInstanceState: Bundle?) {
-                  super.onCreate(savedInstanceState)
-                  setContentView(R.layout.activity_main)
-              }
-          }
-          EOF
-
-          # 创建 XML 布局文件
-          cat > app/src/main/res/layout/activity_main.xml <<EOF
-          <LinearLayout
-              xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:gravity="center">
-
-              <TextView
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="Hello, Kotlin!" />
-          </LinearLayout>
-          EOF
-
-          # 创建 strings.xml 文件
-          cat > app/src/main/res/values/strings.xml <<EOF
-          <resources>
-              <string name="app_name">Kotlin Example App</string>
-          </resources>
-          EOF
+          # 初始化 Gradle Wrapper
+          gradle wrapper --gradle-version 8.1.1
 
       # 3. 构建 APK 文件
       - name: Build APK
         run: |
           cd kotlin-example-app
+          chmod +x gradlew
           ./gradlew assembleDebug
           cd ..
 
-      # 4. 将生成的项目和 APK 推送到仓库
+      # 4. 推送生成的项目和 APK
       - name: Push Generated Project and APK
         run: |
           # 解压和移动文件
