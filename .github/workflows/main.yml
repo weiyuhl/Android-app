@@ -43,7 +43,7 @@ jobs:
           cat > build.gradle <<EOF
           plugins {
               id 'com.android.application' version '8.1.2'
-              id 'kotlin-android' version '1.8.22'
+              id 'org.jetbrains.kotlin.android' version '1.9.10'
           }
 
           android {
@@ -63,9 +63,14 @@ jobs:
               }
           }
 
+          repositories {
+              google()
+              mavenCentral()
+          }
+
           dependencies {
               implementation "androidx.core:core-ktx:1.12.0"
-              implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
+              implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.10"
           }
           EOF
 
