@@ -114,12 +114,13 @@ jobs:
 
         # Add the app icon to res/mipmap
         mkdir -p kotlin-example-app/src/main/res/mipmap
-        echo "<!-- Add your app icon here -->" > kotlin-example-app/src/main/res/mipmap/ic_launcher.png
+        cp /path/to/your/ic_launcher.png kotlin-example-app/src/main/res/mipmap/ic_launcher.png
 
         # Create styles.xml to define themes
         mkdir -p kotlin-example-app/src/main/res/values
         cat > kotlin-example-app/src/main/res/values/styles.xml <<EOF
         <resources>
+            <!-- Base application theme -->
             <style name="Theme.KotlinExampleApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
                 <item name="colorPrimary">@color/colorPrimary</item>
                 <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
@@ -129,6 +130,7 @@ jobs:
                 <item name="colorOnSecondary">@color/colorOnSecondary</item>
             </style>
 
+            <!-- No action bar variant of the base theme -->
             <style name="Theme.KotlinExampleApp.NoActionBar" parent="Theme.KotlinExampleApp">
                 <item name="windowActionBar">false</item>
                 <item name="windowNoTitle">true</item>
