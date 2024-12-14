@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: # 支持手动触发
+  workflow_dispatch: # 支持手动触发工作流
 
 jobs:
   generate-build-push:
@@ -18,23 +18,32 @@ jobs:
       # 2. 初始化环境并创建项目
       - name: Generate Kotlin project
         run: |
-          # 创建项目目录
           mkdir kotlin-example-app
           cd kotlin-example-app
 
-          # 初始化 Gradle Wrapper
-          gradle init --type basic
+          # 创建 settings.gradle
+          cat > settings.gradle <<EOF
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "KotlinExampleApp"
+          EOF
 
-          # 创建标准 Android 项目文件结构
-          mkdir -p app/src/main/java/com/example/app
-          mkdir -p app/src/main/res/layout
-          mkdir -p app/src/main/res/values
-
-          # 创建基础的 build.gradle 文件
+          # 创建 build.gradle
           cat > build.gradle <<EOF
           plugins {
-              id 'com.android.application'
-              id 'kotlin-android'
+              id 'com.android.application' version '8.1.2'
+              id 'kotlin-android' version '1.8.22'
           }
 
           android {
@@ -55,11 +64,17 @@ jobs:
           }
 
           dependencies {
-              implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.0"
+              implementation "androidx.core:core-ktx:1.12.0"
+              implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
           }
           EOF
 
-          # 创建基础的 Kotlin MainActivity
+          # 创建应用程序主目录
+          mkdir -p app/src/main/java/com/example/app
+          mkdir -p app/src/main/res/layout
+          mkdir -p app/src/main/res/values
+
+          # 创建 MainActivity 文件
           cat > app/src/main/java/com/example/app/MainActivity.kt <<EOF
           package com.example.app
 
@@ -74,7 +89,7 @@ jobs:
           }
           EOF
 
-          # 创建简单的 XML 布局文件
+          # 创建 XML 布局文件
           cat > app/src/main/res/layout/activity_main.xml <<EOF
           <LinearLayout
               xmlns:android="http://schemas.android.com/apk/res/android"
@@ -90,45 +105,32 @@ jobs:
           </LinearLayout>
           EOF
 
-          # 创建 values 文件夹中的 strings.xml
+          # 创建 strings.xml 文件
           cat > app/src/main/res/values/strings.xml <<EOF
           <resources>
               <string name="app_name">Kotlin Example App</string>
           </resources>
           EOF
 
-      # 3. 构建 APK
+      # 3. 构建 APK 文件
       - name: Build APK
         run: |
           cd kotlin-example-app
           ./gradlew assembleDebug
           cd ..
 
-      # 4. 压缩项目文件
-      - name: Archive Project Files
-        run: zip -r kotlin-example-app.zip kotlin-example-app
-
-      # 5. 上传项目文件和 APK 文件为构建产物
-      - name: Upload Project Files
-        uses: actions/upload-artifact@v3
-        with:
-          name: kotlin-example-app
-          path: kotlin-example-app.zip
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-debug.apk
-          path: kotlin-example-app/app/build/outputs/apk/debug/app-debug.apk
-
-      # 6. 推送生成的项目到新分支
-      - name: Push Generated Project
+      # 4. 将生成的项目和 APK 推送到仓库
+      - name: Push Generated Project and APK
         run: |
+          # 解压和移动文件
+          mkdir output
+          mv kotlin-example-app/app/build/outputs/apk/debug/app-debug.apk output/
+
+          # 添加并推送文件
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git checkout -b generated-app
-          git add .
-          git commit -m "Generated Kotlin example project and APK"
-          git push origin generated-app
+          git add kotlin-example-app output
+          git commit -m "Add generated Kotlin project and APK"
+          git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
