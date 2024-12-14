@@ -1,107 +1,105 @@
-name: Generate, Build, and Push Kotlin App
+name: Build Kotlin APK
 
 on:
   push:
     branches:
-      - main  # 当 push 到 main 分支时触发
-  workflow_dispatch:  # 支持手动触发工作流
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  generate-build-push:
+  build:
     runs-on: ubuntu-latest
-
+    
     steps:
-      # 1. 使用 actions/setup-java 安装 Java 17
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin' # 使用 Temurin JDK
-          java-version: '17'
+    # 设置 JDK 17
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        version: '17'
 
-      # 2. 检出代码仓库
-      - name: Checkout code
-        uses: actions/checkout@v3
+    # Checkout 代码
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      # 3. 初始化环境并生成项目
-      - name: Generate Kotlin project
-        run: |
-          mkdir kotlin-example-app
-          cd kotlin-example-app
+    # 生成 Kotlin 项目
+    - name: Generate Kotlin project
+      run: |
+        mkdir kotlin-example-app
+        cd kotlin-example-app
 
-          # 创建 settings.gradle
-          cat > settings.gradle <<EOF
-          pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-          rootProject.name = "KotlinExampleApp"
-          EOF
+        # 创建 settings.gradle
+        cat > settings.gradle <<EOF
+        pluginManagement {
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
 
-          # 创建 build.gradle
-          cat > build.gradle <<EOF
-          plugins {
-              id 'com.android.application' version '8.1.2'
-              id 'org.jetbrains.kotlin.android' version '1.9.10'
-          }
+        dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
 
-          android {
-              compileSdkVersion 33
-              defaultConfig {
-                  applicationId "com.example.app"
-                  minSdkVersion 21
-                  targetSdkVersion 33
-                  versionCode 1
-                  versionName "1.0"
-              }
-              buildTypes {
-                  release {
-                      minifyEnabled false
-                      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-                  }
-              }
-          }
+        rootProject.name = "KotlinExampleApp"
+        EOF
 
-          repositories {
-              google()
-              mavenCentral()
-          }
+        # 创建 build.gradle
+        cat > build.gradle <<EOF
+        plugins {
+            id 'com.android.application' version '8.1.2'
+            id 'org.jetbrains.kotlin.android' version '1.9.10'
+        }
 
-          dependencies {
-              implementation "androidx.core:core-ktx:1.12.0"
-              implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.10"
-          }
-          EOF
+        android {
+            compileSdkVersion 33
+            defaultConfig {
+                applicationId "com.example.app"
+                minSdkVersion 21
+                targetSdkVersion 33
+                versionCode 1
+                versionName "1.0"
+            }
+            buildTypes {
+                release {
+                    minifyEnabled false
+                    proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                }
+            }
+        }
 
-          # 初始化 Gradle Wrapper
-          gradle wrapper --gradle-version 8.1.1
+        dependencies {
+            implementation "androidx.core:core-ktx:1.12.0"
+            implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.10"
+        }
+        EOF
 
-      # 4. 构建 APK
-      - name: Build APK
-        run: |
-          cd kotlin-example-app
-          chmod +x gradlew
-          ./gradlew assembleDebug
-          cd ..
+        # 初始化 Gradle Wrapper
+        gradle wrapper --gradle-version 8.1.1
 
-      # 5. 推送生成的项目和 APK
-      - name: Push Generated Project and APK
-        run: |
-          mkdir output
-          mv kotlin-example-app/app/build/outputs/apk/debug/app-debug.apk output/
+    # 构建 APK
+    - name: Build APK
+      run: |
+        cd kotlin-example-app
+        ./gradlew assembleDebug
 
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add kotlin-example-app output
-          git commit -m "Add generated Kotlin project and APK"
-          git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # 推送生成的项目和 APK 文件
+    - name: Push Generated Project and APK
+      run: |
+        cd kotlin-example-app
+        git add .
+        git commit -m "Add generated Kotlin project"
+        git push
+
+    # 上传 APK 文件到仓库
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: debug-apk
+        path: kotlin-example-app/app/build/outputs/apk/debug/app-debug.apk
