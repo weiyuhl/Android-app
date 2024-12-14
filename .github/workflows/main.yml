@@ -1,7 +1,10 @@
-name: Kotlin Example App Build
+name: Build and Deploy Kotlin App
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
     branches:
       - main
 
@@ -10,142 +13,57 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Set up JDK 17
+    # Checkout the code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Set up JDK 17
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
         java-version: '17'
-        distribution: 'temurin'
-        java-package: 'jdk'
-        check-latest: false
+        distribution: 'adoptopenjdk'
 
-    # Step 2: Checkout code
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    # Step 3: Generate Kotlin project
+    # Set up Kotlin project structure
     - name: Generate Kotlin project
       run: |
         mkdir -p kotlin-example-app/src/main/res/values
-        mkdir -p kotlin-example-app/src/main/res/mipmap
+        # Ensure necessary directories are created, such as res/values for resources
 
-        # Create AndroidManifest.xml
-        cat > kotlin-example-app/src/main/AndroidManifest.xml <<EOF
-        <?xml version="1.0" encoding="utf-8"?>
-        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools">
-            <application
-                android:allowBackup="true"
-                android:label="KotlinExampleApp"
-                android:icon="@mipmap/ic_launcher"
-                android:theme="@style/Theme.KotlinExampleApp"
-                tools:targetApi="31">
+    # Install Android SDK and dependencies
+    - name: Install Android SDK
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y android-sdk
+        echo y | sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "extras;android;m2repository" "extras;google;m2repository"
+    
+    # Configure Gradle wrapper and dependencies
+    - name: Configure Gradle wrapper
+      run: ./gradlew wrapper --gradle-version 8.1.1 --distribution-type all
 
-                <activity
-                    android:name=".MainActivity"
-                    android:label="MainActivity"
-                    android:theme="@style/Theme.KotlinExampleApp.NoActionBar"
-                    android:exported="true">
-                    <intent-filter>
-                        <action android:name="android.intent.action.MAIN" />
-                        <category android:name="android.intent.category.LAUNCHER" />
-                    </intent-filter>
-                </activity>
-            </application>
-        </manifest>
-        EOF
-
-        # Create settings.gradle
-        cat > kotlin-example-app/settings.gradle <<EOF
-        pluginManagement {
-          repositories {
-            google()
-            mavenCentral()
-          }
-        }
-        dependencyResolutionManagement {
-          repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-          repositories {
-            google()
-            mavenCentral()
-          }
-        }
-        rootProject.name = "KotlinExampleApp"
-        EOF
-
-        # Create build.gradle
-        cat > kotlin-example-app/build.gradle <<EOF
-        plugins {
-          id 'com.android.application' version '8.1.2'
-          id 'org.jetbrains.kotlin.android' version '1.9.10'
-        }
-
-        android {
-          compileSdkVersion 34
-
-          defaultConfig {
-            applicationId "com.example.app"
-            minSdkVersion 21
-            targetSdkVersion 34
-            versionCode 1
-            versionName "1.0"
-            namespace 'com.example.app'
-          }
-
-          buildTypes {
-            release {
-              minifyEnabled false
-              proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            }
-          }
-        }
-
-        dependencies {
-          implementation "androidx.core:core-ktx:1.12.0"
-          implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.10"
-          implementation 'com.google.android.material:material:1.9.0' # Add Material dependency
-        }
-        EOF
-
-        # Create gradle.properties to enable AndroidX
-        cat > kotlin-example-app/gradle.properties <<EOF
-        android.useAndroidX=true
-        android.enableJetifier=true
-        EOF
-
-        # Create styles.xml to define missing styles
-        cat > kotlin-example-app/src/main/res/values/styles.xml <<EOF
-        <resources>
-
-            <!-- Define the main app theme -->
-            <style name="Theme.KotlinExampleApp" parent="Theme.Material3.DayNight.NoActionBar">
-                <!-- Customize your theme here -->
-            </style>
-
-            <!-- Define the NoActionBar theme -->
-            <style name="Theme.KotlinExampleApp.NoActionBar" parent="Theme.Material3.DayNight.NoActionBar">
-                <!-- Customize your NoActionBar theme here -->
-            </style>
-
-        </resources>
-        EOF
-
-        # Initialize Gradle Wrapper
-        cd kotlin-example-app
-        gradle wrapper --gradle-version 8.1.1
-
-        # Step 3.1: Add the app icon to res/mipmap
-        cp ../ic_launcher.png src/main/res/mipmap/ic_launcher.png
-
-    # Step 4: Build the project
+    # Build Kotlin project
     - name: Build Kotlin project
       run: |
         cd kotlin-example-app
         ./gradlew clean build
 
-    # Step 5: Upload APK as Artifact
+    # Upload APK artifact
     - name: Upload APK as Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: kotlin-example-app-apk
-        path: kotlin-example-app/app/build/outputs/apk/release/app-release.apk
+        name: apk
+        path: kotlin-example-app/build/outputs/apk/debug/app-debug.apk
+
+    # Checkout code for release process (optional if releasing the APK)
+    - name: Checkout code again for release (optional)
+      uses: actions/checkout@v3
+
+    # Release APK (optional - you may want to deploy or upload it to a repository)
+    - name: Release APK
+      run: |
+        # You can replace this with actual release steps (upload to Play Store, etc.)
+        echo "Releasing APK..."
+
+    # Finish
+    - name: Publish Checkout code
+      run: echo "Build completed successfully."
