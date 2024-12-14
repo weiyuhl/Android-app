@@ -1,3 +1,11 @@
+name: Generate, Build, and Push Kotlin App
+
+on:
+  push:
+    branches:
+      - main  # 当 push 到 main 分支时触发
+  workflow_dispatch:  # 支持手动触发工作流
+
 jobs:
   generate-build-push:
     runs-on: ubuntu-latest
