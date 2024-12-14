@@ -80,15 +80,15 @@ jobs:
         }
 
         android {
-          compileSdkVersion 34 // 更新为 34
+          compileSdkVersion 34
 
           defaultConfig {
             applicationId "com.example.app"
             minSdkVersion 21
-            targetSdkVersion 34 // 更新为 34
+            targetSdkVersion 34
             versionCode 1
             versionName "1.0"
-            namespace 'com.example.app'  // Required namespace
+            namespace 'com.example.app'
           }
 
           buildTypes {
@@ -112,27 +112,12 @@ jobs:
         EOF
 
         # Initialize Gradle Wrapper
+        cd kotlin-example-app
         gradle wrapper --gradle-version 8.1.1
 
         # Step 3.1: Add the app icon to res/mipmap
-        mkdir -p kotlin-example-app/src/main/res/mipmap
-        cp ./assets/ic_launcher.png kotlin-example-app/src/main/res/mipmap/ic_launcher.png
-
-        # Step 3.2: Create the styles.xml file
-        mkdir -p kotlin-example-app/src/main/res/values
-        cat > kotlin-example-app/src/main/res/values/styles.xml <<EOF
-        <?xml version="1.0" encoding="utf-8"?>
-        <resources>
-            <style name="Theme.KotlinExampleApp" parent="Theme.Material3.DayNight.NoActionBar">
-                <item name="android:windowNoTitle">true</item>
-                <item name="android:windowFullscreen">true</item>
-            </style>
-
-            <style name="Theme.KotlinExampleApp.NoActionBar" parent="Theme.KotlinExampleApp">
-                <item name="android:windowActionBar">false</item>
-            </style>
-        </resources>
-        EOF
+        mkdir -p src/main/res/mipmap
+        cp ../ic_launcher.png src/main/res/mipmap/ic_launcher.png
 
     # Step 4: Build the project
     - name: Build Kotlin project
