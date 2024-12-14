@@ -26,7 +26,8 @@ jobs:
     # Step 3: Generate Kotlin project
     - name: Generate Kotlin project
       run: |
-        mkdir -p kotlin-example-app/src/main
+        mkdir -p kotlin-example-app/src/main/res/values
+        mkdir -p kotlin-example-app/src/main/res/mipmap
 
         # Create AndroidManifest.xml
         cat > kotlin-example-app/src/main/AndroidManifest.xml <<EOF
@@ -111,12 +112,28 @@ jobs:
         android.enableJetifier=true
         EOF
 
+        # Create styles.xml to define missing styles
+        cat > kotlin-example-app/src/main/res/values/styles.xml <<EOF
+        <resources>
+
+            <!-- Define the main app theme -->
+            <style name="Theme.KotlinExampleApp" parent="Theme.Material3.DayNight.NoActionBar">
+                <!-- Customize your theme here -->
+            </style>
+
+            <!-- Define the NoActionBar theme -->
+            <style name="Theme.KotlinExampleApp.NoActionBar" parent="Theme.Material3.DayNight.NoActionBar">
+                <!-- Customize your NoActionBar theme here -->
+            </style>
+
+        </resources>
+        EOF
+
         # Initialize Gradle Wrapper
         cd kotlin-example-app
         gradle wrapper --gradle-version 8.1.1
 
         # Step 3.1: Add the app icon to res/mipmap
-        mkdir -p src/main/res/mipmap
         cp ../ic_launcher.png src/main/res/mipmap/ic_launcher.png
 
     # Step 4: Build the project
