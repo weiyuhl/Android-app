@@ -112,6 +112,30 @@ jobs:
         android.enableJetifier=true
         EOF
 
+        # Add the app icon to res/mipmap
+        mkdir -p kotlin-example-app/src/main/res/mipmap
+        echo "<!-- Add your app icon here -->" > kotlin-example-app/src/main/res/mipmap/ic_launcher.png
+
+        # Create styles.xml to define themes
+        mkdir -p kotlin-example-app/src/main/res/values
+        cat > kotlin-example-app/src/main/res/values/styles.xml <<EOF
+        <resources>
+            <style name="Theme.KotlinExampleApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+                <item name="colorPrimary">@color/colorPrimary</item>
+                <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
+                <item name="colorOnPrimary">@color/colorOnPrimary</item>
+                <item name="colorSecondary">@color/colorSecondary</item>
+                <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
+                <item name="colorOnSecondary">@color/colorOnSecondary</item>
+            </style>
+
+            <style name="Theme.KotlinExampleApp.NoActionBar" parent="Theme.KotlinExampleApp">
+                <item name="windowActionBar">false</item>
+                <item name="windowNoTitle">true</item>
+            </style>
+        </resources>
+        EOF
+
         # Initialize Gradle Wrapper
         gradle wrapper --gradle-version 8.1.1
 
