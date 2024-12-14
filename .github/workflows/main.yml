@@ -81,15 +81,15 @@ jobs:
         }
 
         android {
-          compileSdkVersion 34 // 更新为 34
+          compileSdkVersion 34
 
           defaultConfig {
             applicationId "com.example.app"
             minSdkVersion 21
-            targetSdkVersion 34 // 更新为 34
+            targetSdkVersion 34
             versionCode 1
             versionName "1.0"
-            namespace 'com.example.app'  // Required namespace
+            namespace 'com.example.app'
           }
 
           buildTypes {
